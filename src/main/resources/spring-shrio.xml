@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--配置自定义的realm-->
+    <bean id="myRealm" class="com.xyo2o.common.realm.MyRealm">
+        <!--自定义加密-->
+
+    </bean>
+
+    <!--安全管理器-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myRealm"/>
+    </bean>
+
+    <!--shiro过滤器 核心-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--shiro的核心安全接口，这个属性是必须的-->
+        <property name="securityManager" ref="securityManager"/>
+        <!--身份验证失败 则跳转到登录页面配置-->
+        <property name="loginUrl" value="/index/index"/>
+        <!--权限认证失败，则跳转到指定页面-->
+        <property name="unauthorizedUrl" value="/index/nopower"/>
+        <!--shiro 连接约束配置，即过滤器的定义-->
+        <property name="filterChainDefinitions">
+            <value>
+                <!--anon 表示匿名访问，不需要认证及授权-->
+                /index/**=anon
+                /user/login=anon
+                <!--authc 表示需要认证 没有进行身份认证是不能进行访问的-->
+                /user/student=roles[teacher]
+                /user/teacher=perms["user:create"]
+                /user/**=authc
+            </value>
+        </property>
+    </bean>
+
+    <!--保证实现了shiro内部lifeecycle函数的bean执行-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+
+</beans>
