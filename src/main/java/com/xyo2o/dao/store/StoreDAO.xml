@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.xyo2o.dao.store.StoreDAO">
+	<cache type="com.xyo2o.common.cache.MybatisRedisCache"/>
+	<resultMap type="com.xyo2o.domain.store.Store" id="storeResultMap">
+		<id column="s_id" property="s_id"/>
+		<result column="name" property="s_name"/>
+		<result column="status" property="status"/>
+		<result column="opendate" property="openDate"/>
+		<result column="building" property="building"/>
+		<result column="registerdate" property="registerDate"/>
+		<collection property="storeAdmins" ofType="com.xyo2o.domain.store.StoreAdmin">
+			<id column="sa_id" property="sa_id"/>
+			<result column="username" property="userName"/>
+			<result column="password" property="passWord"/>
+			<result column="nickname" property="nickName"/>
+			<result column="registerdate" property="registerDate"/>
+		</collection>
+	</resultMap>
+	
+	<select id="getStore" resultMap="storeResultMap">
+		select * from xy_store 
+	</select>
+	<select id="findAll" resultMap="storeResultMap">
+		select * from xy_store c,xy_storeadmin
+	</select>
+</mapper>

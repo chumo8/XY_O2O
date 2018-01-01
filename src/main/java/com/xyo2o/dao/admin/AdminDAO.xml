@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.xyo2o.dao.admin.AdminDAO">
+  <cache type="com.xyo2o.common.cache.MybatisRedisCache"/>
+  
+  	<resultMap id="AdminResultMap" type="Admin">
+		<id column="a_id" property="id" />
+		<result column="a_username" property="username" />
+		<result column="a_password" property="password" />
+		<result column="a_name" property="name"/>
+		<result column="a_ip" property="ip"/>
+		<result column="a_time" property="time"/>
+		<result column="a_state" property="state"/>
+	</resultMap>
+	<select id="selectOneByUsername" resultMap="AdminResultMap">
+		select * from xy_admin where a_username = #{username}
+	</select>	
+	<select id="selectAll" resultMap="AdminResultMap">
+		select * from xy_admin where a_state = 0
+	</select>
+	<insert id="insert" parameterType="Admin">
+		insert into xy_admin(a_username,a_password,a_name)
+					values(#{username},#{password},#{name})
+	</insert>
+	<select id="selectOneByid" resultType="Admin">
+		select * from xy_admin where a_id = #{id} 
+	</select>
+	<update id="deleteByid" parameterType="Long">
+		update xy_admin set 
+			a_state= 1
+		 where a_id = #{id}
+	</update>
+	<update id="updatePassword" parameterType="Admin">
+		update t_user set 
+			a_password = #{password}
+		 where a_id = #{id}
+	</update>
+	<update id="updateStateById" parameterType="Admin">
+		update t_user set 
+			a_state = #{state}
+		 where a_id = #{id}
+	</update>
+  </mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xyo2o.dao.user.UserDAO">
+
+	<cache type="com.xyo2o.common.cache.MybatisRedisCache"/>
+	<resultMap type="com.xyo2o.domain.user.User" id="userResultMap">
+		<id column="u_id" property="userId"/>
+		<result column="username" property="userName"/>
+		<result column="password" property="passWord"/>
+		<result column="nickname" property="nickName"/>
+		<result column="registerdate" property="registerDate"/>
+		<result column="state" property="state"/>
+		<association property="info" column="info_id" javaType="com.xyo2o.domain.user.Info">
+			<id column="i_id" property="infoId"/>
+			<result column="tel" property="tel"/>
+			<result column="sex" property="sex"/>
+			<result column="status" property="status"/>
+			<result column="avatar" property="avatar"/>
+			<result column="email" property="email"/>
+			<result column="stu_id" property="stu_id"/>
+			<result column="name" property="name"/>
+			<association property="wallet" column="wallet_id" javaType="com.xyo2o.domain.user.Wallet">
+				<id column="w_id" property="walletId"/>
+				<result column="accountover" property="accountOver"/>
+				<result column="integral" property="integral"/>
+			</association>
+		</association>
+	</resultMap>
+	
+	<select id="getCount" resultType="int">
+		SELECT
+			count(xy_user.u_id)
+		FROM
+			xy_user ,
+			xy_user_info ,
+			xy_wallet
+		WHERE
+			xy_user.info_id = xy_user_info.i_id AND
+			xy_user_info.wallet_id = xy_wallet.w_id AND
+			xy_user.state != 3
+		<if test="username!=null and username!=''">
+			and username like CONCAT('%',#{username},'%')
+		</if>
+		<if test="sex!=-1">
+			and sex = #{sex}
+		</if>
+		<if test="status!=-1">
+			and status = #{status}
+		</if>
+	</select>
+	<select id="queryUser" resultMap="userResultMap" parameterType="com.xyo2o.dto.user.UserQueryPageDTO">
+		SELECT
+			*
+		FROM
+			xy_user ,
+			xy_user_info ,
+			xy_wallet
+		WHERE
+			xy_user.info_id = xy_user_info.i_id AND
+			xy_user_info.wallet_id = xy_wallet.w_id AND
+			xy_user.state != 3
+		<if test="username!=null and username!=''">
+			and username like CONCAT('%',#{username},'%')
+		</if>
+		<if test="sex!=-1">
+			and sex = #{sex}
+		</if>
+		<if test="status!=-1">
+			and status = #{status}
+		</if>
+		limit #{beginIndex},#{pageSize}
+	</select>
+	<insert id="insertWallet" parameterType="com.xyo2o.domain.user.Wallet" useGeneratedKeys="true" keyProperty="walletId">
+		insert into xy_wallet(accountover,integral) values(#{accountOver},#{integral})
+	</insert>
+	<insert id="insertInfo" parameterType="com.xyo2o.domain.user.Info" useGeneratedKeys="true" keyProperty="infoId">
+		insert into xy_user_info(tel,sex,status,avatar,email,stu_id,name,wallet_id) values(#{tel},#{sex},#{status},#{avatar},#{email},#{stu_id},#{name},#{wallet.walletId})
+	</insert>
+	<insert id="insertUser" parameterType="com.xyo2o.domain.user.User">
+		insert into xy_user(username,password,nickname,registerdate,state,info_id) values(#{userName},#{passWord},#{nickName},#{registerDate},#{state},#{info.infoId})
+	</insert>
+	
+	<select id="testNickName" resultMap="userResultMap">
+		select * from xy_user where nickname = #{nickName}
+	</select>
+	<select id="testUserName" resultMap="userResultMap">
+		select * from xy_user where username = #{userName}
+	</select>
+	<select id="findOneById" resultMap="userResultMap">
+		SELECT
+		xy_user.u_id,
+		xy_user.username,
+		xy_user.`password`,
+		xy_user.nickname,
+		xy_user.registerdate,
+		xy_user.state,
+		xy_user.info_id,
+		xy_user_info.i_id,
+		xy_user_info.tel,
+		xy_user_info.sex,
+		xy_user_info.`status`,
+		xy_user_info.avatar,
+		xy_user_info.email,
+		xy_user_info.stu_id,
+		xy_user_info.`name`,
+		xy_user_info.wallet_id,
+		xy_wallet.w_id,
+		xy_wallet.accountover,
+		xy_wallet.integral
+		FROM
+		xy_user ,
+		xy_user_info ,
+		xy_wallet
+		WHERE
+		xy_user.info_id = xy_user_info.i_id AND
+		xy_user.u_id = #{id} AND
+		xy_user_info.wallet_id = xy_wallet.w_id
+
+	</select>
+	<update id="updateWallet" parameterType="com.xyo2o.domain.user.Wallet">
+		update xy_wallet set accountover = #{wallet.accountOver},integral = #{wallet.integral} where w_id = #{walletId}
+	</update>
+	<update id="updateInfo" parameterType="com.xyo2o.domain.user.Info">
+		update xy_user_info set tel = #{info.tel},sex = #{info.sex},status = #{info.status},avatar = #{info.avatar},email = #{info.avatar},
+		stu_id = #{info.stu_id},name = #{info.name} where i_id = #{infoId}
+	</update>
+	<update id="updateUser" parameterType="com.xyo2o.domain.user.User">
+		update xy_user set password = #{user.passWord},registerdate = #{user.registerDate}
+		where u_id = #{userId}
+	</update>
+	<update id="delUserById" parameterType="java.util.List">
+		update xy_user set state = 3 where u_id in 
+		<foreach collection="list" item="ids" index="index" open="(" separator="," close=")">
+			#{ids}
+		</foreach>
+	</update>
+</mapper>

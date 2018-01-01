@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.xyo2o.dao.store.StoreAdminDAO">
+	<cache type="com.xyo2o.common.cache.MybatisRedisCache"/>
+	<resultMap type="com.xyo2o.domain.store.StoreAdmin" id="storeAdminResultMap">
+		<id column="sa_id" property="sa_id"/>
+		<result column="username" property="userName"/>
+		<result column="password" property="passWord"/>
+		<result column="nickname" property="nickName"/>
+		<result column="registerdate" property="registerDate"/>
+		<association property="store" javaType="com.xyo2o.domain.store.Store">
+			<id column="s_id" property="s_id"/>
+			<result column="name" property="s_name"/>
+			<result column="status" property="status"/>
+			<result column="opendate" property="openDate"/>
+			<result column="building" property="building"/>
+			<result column="registerdate" property="registerDate"/>
+		</association>
+	</resultMap>
+	<select id="getCount" resultType="int">
+		select count(sa_id) from xy_storeadmin c,xy_store s where 1=1
+		<if test="username!=null and username!=''">
+			and c.username like CONCAT('%',#{username},'%')
+		</if>
+	</select>
+	<select id="findAll" resultMap="storeAdminResultMap" >
+		select * from xy_storeadmin c,xy_store s where c.s_id = s.s_id
+	</select>
+	<insert id="insert" parameterType="com.xyo2o.domain.store.StoreAdmin">
+		insert into xy_storeadmin (username,password,nickname,registerdate,s_id) values(#{a.userName},#{a.passWord},#{a.nickName},#{a.registerDate},#{s_id})
+	</insert>
+	<update id="update" parameterType="com.xyo2o.domain.store.StoreAdmin">
+		update xy_storeadmin set password = #{a.passWord}, nickname = #{a.nickName},registerdate = #{a.registerDate} where sa_id = #{id}
+	</update>
+	<delete id="delAdmin">
+		delete from xy_storeadmin where sa_id = #{id}
+	</delete>
+	<select id="query" resultMap="storeAdminResultMap">
+		select * from xy_storeadmin c,xy_store s where 1=1 
+		<if test="username!=null and username!=''">
+			and c.username like CONCAT('%',#{username},'%')
+		</if>
+		limit #{beginIndex},#{pageSize}
+	</select>
+	<select id="findOne" resultMap="storeAdminResultMap">
+		select * from xy_storeadmin where sa_id = #{id}
+	</select>
+</mapper>
